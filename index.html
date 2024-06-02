@@ -1,0 +1,1712 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/multi-style-layer.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="data/MBMCStats_1.js"></script>
+        <script src="data/MBMCTotalLength_2.js"></script>
+        <script src="data/MBMCInternalCoverage_3.js"></script>
+        <script src="data/MBMCRoutesStats_4.js"></script>
+        <script src="data/BusFrequency_5.js"></script>
+        <script src="data/GTFSRoutes_6.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:1
+        }).fitBounds([[19.17256209267949,72.77543919835004],[19.327341910609043,72.99370831739209]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        document.querySelector(".leaflet-popup-pane").addEventListener("load", function(event) {
+          var tagName = event.target.tagName,
+            popup = map._popup;
+          // Also check if flag is already set.
+          if (tagName === "IMG" && popup && !popup._updated) {
+            popup._updated = true; // Set flag to prevent looping.
+            popup.update();
+          }
+        }, true);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_OpenStreetMap_0');
+        map.getPane('pane_OpenStreetMap_0').style.zIndex = 400;
+        var layer_OpenStreetMap_0 = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OpenStreetMap_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_OpenStreetMap_0;
+        map.addLayer(layer_OpenStreetMap_0);
+        function pop_MBMCStats_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="shapeName"colspan="2"><strong>shapeName</strong><br />' + (feature.properties['shapeName'] !== null ? autolinker.link(feature.properties['shapeName'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Area KM</th>\
+                        <td>' + (feature.properties['Area KM'] !== null ? autolinker.link(feature.properties['Area KM'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Perimeter</th>\
+                        <td>' + (feature.properties['Perimeter'] !== null ? autolinker.link(feature.properties['Perimeter'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Pop</th>\
+                        <td>' + (feature.properties['Pop'] !== null ? autolinker.link(feature.properties['Pop'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Pop/Km2</th>\
+                        <td>' + (feature.properties['Pop/Km2'] !== null ? autolinker.link(feature.properties['Pop/Km2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+            var popup = layer.getPopup();
+            var content = popup.getContent();
+            var updatedContent = removeEmptyRowsFromPopupContent(content, feature);
+            popup.setContent(updatedContent);
+        }
+
+        function style_MBMCStats_1_0() {
+            return {
+                pane: 'pane_MBMCStats_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.408)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(229,182,54,0.408)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_MBMCStats_1');
+        map.getPane('pane_MBMCStats_1').style.zIndex = 401;
+        map.getPane('pane_MBMCStats_1').style['mix-blend-mode'] = 'normal';
+        var layer_MBMCStats_1 = new L.geoJson(json_MBMCStats_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_MBMCStats_1',
+            layerName: 'layer_MBMCStats_1',
+            pane: 'pane_MBMCStats_1',
+            onEachFeature: pop_MBMCStats_1,
+            style: style_MBMCStats_1_0,
+        });
+        bounds_group.addLayer(layer_MBMCStats_1);
+        map.addLayer(layer_MBMCStats_1);
+        function pop_MBMCTotalLength_2(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Start Time'] !== null ? autolinker.link(feature.properties['Start Time'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['End Time'] !== null ? autolinker.link(feature.properties['End Time'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['length'] !== null ? autolinker.link(feature.properties['length'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="OVerall Km"colspan="2"><strong>OVerall Km</strong><br />' + (feature.properties['OVerall Km'] !== null ? autolinker.link(feature.properties['OVerall Km'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+            var popup = layer.getPopup();
+            var content = popup.getContent();
+            var updatedContent = removeEmptyRowsFromPopupContent(content, feature);
+            popup.setContent(updatedContent);
+        }
+
+        function style_MBMCTotalLength_2_0() {
+            return {
+                pane: 'pane_MBMCTotalLength_2',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_MBMCTotalLength_2');
+        map.getPane('pane_MBMCTotalLength_2').style.zIndex = 402;
+        map.getPane('pane_MBMCTotalLength_2').style['mix-blend-mode'] = 'normal';
+        var layer_MBMCTotalLength_2 = new L.geoJson(json_MBMCTotalLength_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_MBMCTotalLength_2',
+            layerName: 'layer_MBMCTotalLength_2',
+            pane: 'pane_MBMCTotalLength_2',
+            onEachFeature: pop_MBMCTotalLength_2,
+            style: style_MBMCTotalLength_2_0,
+        });
+        bounds_group.addLayer(layer_MBMCTotalLength_2);
+        map.addLayer(layer_MBMCTotalLength_2);
+        function pop_MBMCInternalCoverage_3(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="Name"colspan="2"><strong>Name</strong><br />' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Start Time'] !== null ? autolinker.link(feature.properties['Start Time'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['End Time'] !== null ? autolinker.link(feature.properties['End Time'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['length'] !== null ? autolinker.link(feature.properties['length'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['OVerall Km'] !== null ? autolinker.link(feature.properties['OVerall Km'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['shapeName'] !== null ? autolinker.link(feature.properties['shapeName'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['shapeID'] !== null ? autolinker.link(feature.properties['shapeID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['shapeGroup'] !== null ? autolinker.link(feature.properties['shapeGroup'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['shapeType'] !== null ? autolinker.link(feature.properties['shapeType'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['length_2'] !== null ? autolinker.link(feature.properties['length_2'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="MBMC KM"colspan="2"><strong>MBMC KM</strong><br />' + (feature.properties['MBMC KM'] !== null ? autolinker.link(feature.properties['MBMC KM'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+            var popup = layer.getPopup();
+            var content = popup.getContent();
+            var updatedContent = removeEmptyRowsFromPopupContent(content, feature);
+            popup.setContent(updatedContent);
+        }
+
+        function style_MBMCInternalCoverage_3_0() {
+            return {
+                pane: 'pane_MBMCInternalCoverage_3',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        function style_MBMCInternalCoverage_3_1() {
+            return {
+                pane: 'pane_MBMCInternalCoverage_3',
+                opacity: 1,
+                color: 'rgba(255,96,17,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_MBMCInternalCoverage_3');
+        map.getPane('pane_MBMCInternalCoverage_3').style.zIndex = 403;
+        map.getPane('pane_MBMCInternalCoverage_3').style['mix-blend-mode'] = 'normal';
+        var layer_MBMCInternalCoverage_3 = new L.geoJson.multiStyle(json_MBMCInternalCoverage_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_MBMCInternalCoverage_3',
+            layerName: 'layer_MBMCInternalCoverage_3',
+            pane: 'pane_MBMCInternalCoverage_3',
+            onEachFeature: pop_MBMCInternalCoverage_3,
+            styles: [style_MBMCInternalCoverage_3_0,style_MBMCInternalCoverage_3_1,]
+        });
+        bounds_group.addLayer(layer_MBMCInternalCoverage_3);
+        map.addLayer(layer_MBMCInternalCoverage_3);
+        function pop_MBMCRoutesStats_4(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="Name"colspan="2"><strong>Name</strong><br />' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Length Km</th>\
+                        <td>' + (feature.properties['Length Km'] !== null ? autolinker.link(feature.properties['Length Km'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Start Time</th>\
+                        <td class="visible-with-data" id="Start Time">' + (feature.properties['Start Time'] !== null ? autolinker.link(feature.properties['Start Time'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">End Time</th>\
+                        <td class="visible-with-data" id="End Time">' + (feature.properties['End Time'] !== null ? autolinker.link(feature.properties['End Time'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Frequency</strong><br />' + (feature.properties['Frequency'] !== null ? autolinker.link(feature.properties['Frequency'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2"><strong>Time Table</strong><br />' + (feature.properties['Time Table'] !== null ? autolinker.link(feature.properties['Time Table'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+            var popup = layer.getPopup();
+            var content = popup.getContent();
+            var updatedContent = removeEmptyRowsFromPopupContent(content, feature);
+            popup.setContent(updatedContent);
+        }
+
+        function style_MBMCRoutesStats_4_0(feature) {
+            switch(String(feature.properties['Name'])) {
+                case 'Route 1':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 10':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 10 AC':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 12':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 14':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 15':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 16':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 17':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 18':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 19':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 2':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 20':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 21':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 22':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 23':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 24':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 25':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 28':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 29':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 29 AC':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 4':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 5':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 6':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        function style_MBMCRoutesStats_4_1(feature) {
+            switch(String(feature.properties['Name'])) {
+                case 'Route 1':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(49,220,106,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 10':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(67,206,79,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 10 AC':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(208,15,189,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 12':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(227,193,22,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 14':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(27,54,206,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 15':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(71,216,232,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 16':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(183,116,228,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 17':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(211,220,107,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 18':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(213,28,58,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 19':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(83,68,222,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 2':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(216,85,139,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 20':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(80,214,158,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 21':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(108,210,35,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 22':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(59,234,24,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 23':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(133,218,205,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 24':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(127,84,209,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 25':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(199,80,220,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 28':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(145,206,23,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 29':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(229,158,59,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 29 AC':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(13,91,209,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 4':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(226,84,71,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 5':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(47,157,217,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Route 6':
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(209,151,121,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                default:
+                    return {
+                pane: 'pane_MBMCRoutesStats_4',
+                opacity: 1,
+                color: 'rgba(223,83,176,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_MBMCRoutesStats_4');
+        map.getPane('pane_MBMCRoutesStats_4').style.zIndex = 404;
+        map.getPane('pane_MBMCRoutesStats_4').style['mix-blend-mode'] = 'normal';
+        var layer_MBMCRoutesStats_4 = new L.geoJson.multiStyle(json_MBMCRoutesStats_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_MBMCRoutesStats_4',
+            layerName: 'layer_MBMCRoutesStats_4',
+            pane: 'pane_MBMCRoutesStats_4',
+            onEachFeature: pop_MBMCRoutesStats_4,
+            styles: [style_MBMCRoutesStats_4_0,style_MBMCRoutesStats_4_1,]
+        });
+        bounds_group.addLayer(layer_MBMCRoutesStats_4);
+        map.addLayer(layer_MBMCRoutesStats_4);
+        function pop_BusFrequency_5(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="frequency"colspan="2"><strong>frequency</strong><br />' + (feature.properties['frequency'] !== null ? autolinker.link(feature.properties['frequency'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="prev_stop_id"colspan="2"><strong>prev_stop_id</strong><br />' + (feature.properties['prev_stop_id'] !== null ? autolinker.link(feature.properties['prev_stop_id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="prev_stop_name"colspan="2"><strong>prev_stop_name</strong><br />' + (feature.properties['prev_stop_name'] !== null ? autolinker.link(feature.properties['prev_stop_name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="next_stop_id"colspan="2"><strong>next_stop_id</strong><br />' + (feature.properties['next_stop_id'] !== null ? autolinker.link(feature.properties['next_stop_id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="next_stop_name"colspan="2"><strong>next_stop_name</strong><br />' + (feature.properties['next_stop_name'] !== null ? autolinker.link(feature.properties['next_stop_name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="agency_id"colspan="2"><strong>agency_id</strong><br />' + (feature.properties['agency_id'] !== null ? autolinker.link(feature.properties['agency_id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="agency_name"colspan="2"><strong>agency_name</strong><br />' + (feature.properties['agency_name'] !== null ? autolinker.link(feature.properties['agency_name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+            var popup = layer.getPopup();
+            var content = popup.getContent();
+            var updatedContent = removeEmptyRowsFromPopupContent(content, feature);
+            popup.setContent(updatedContent);
+        }
+
+        function style_BusFrequency_5_0() {
+            return {
+                pane: 'pane_BusFrequency_5',
+                opacity: 1,
+                color: 'rgba(0,175,32,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'bevel',
+                weight: 1.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_BusFrequency_5');
+        map.getPane('pane_BusFrequency_5').style.zIndex = 405;
+        map.getPane('pane_BusFrequency_5').style['mix-blend-mode'] = 'normal';
+        var layer_BusFrequency_5 = new L.geoJson(json_BusFrequency_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_BusFrequency_5',
+            layerName: 'layer_BusFrequency_5',
+            pane: 'pane_BusFrequency_5',
+            onEachFeature: pop_BusFrequency_5,
+            style: style_BusFrequency_5_0,
+        });
+        bounds_group.addLayer(layer_BusFrequency_5);
+        map.addLayer(layer_BusFrequency_5);
+        function pop_GTFSRoutes_6(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="route_id"colspan="2"><strong>route_id</strong><br />' + (feature.properties['route_id'] !== null ? autolinker.link(feature.properties['route_id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="route_name"colspan="2"><strong>route_name</strong><br />' + (feature.properties['route_name'] !== null ? autolinker.link(feature.properties['route_name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+            var popup = layer.getPopup();
+            var content = popup.getContent();
+            var updatedContent = removeEmptyRowsFromPopupContent(content, feature);
+            popup.setContent(updatedContent);
+        }
+
+        function style_GTFSRoutes_6_0(feature) {
+            switch(String(feature.properties['route_name'])) {
+                case 'Mira Road Station-Thane E AC29AC':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Mira Road Station E-KD Empire21':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'BHAYNDER STATION E-MIRA ROAD STATION E28':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Bhayandar Station W-Uttan Naka2':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Uttan Naka-Manori Tar6':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Mira Road Station-Western Park24':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Bhayandar Station W-Thane Station East Kopry10':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Mira Road Station-Thane E29':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Bhayandar Station East-KD Empire12':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Miraroad Station E-Vinaynagar17':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Bhayandar Station West- Chimaji Appa Chouk1':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Bhayandar Station W-Thane Station East Kopry AC10AC':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'BHAYNDER STATION (W)-MORVA BHAT20':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'BHAYNDER STATION (W)-KASHIMIRA NAKA5':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Bhayandar Station W-Pagoda4':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Bhayandar Bus Station E-Borivali National Park14':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Mira Road Station-Rashmi Complex15':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Mira Road Station-Laxmi Park Tiwari College16':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Western Park-Jogeshwari Station west18':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Mira Road Station-JP North City19':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Mira Road Station E-Modern Comapany22':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        function style_GTFSRoutes_6_1(feature) {
+            switch(String(feature.properties['route_name'])) {
+                case 'Mira Road Station-Thane E AC29AC':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,69,0,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Mira Road Station E-KD Empire21':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(219,112,147,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'BHAYNDER STATION E-MIRA ROAD STATION E28':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(173,255,47,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Bhayandar Station W-Uttan Naka2':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(0,0,255,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Uttan Naka-Manori Tar6':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,182,193,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Mira Road Station-Western Park24':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,182,193,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Bhayandar Station W-Thane Station East Kopry10':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,182,193,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Mira Road Station-Thane E29':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(154,205,50,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Bhayandar Station East-KD Empire12':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(173,255,47,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Miraroad Station E-Vinaynagar17':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(250,128,114,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Bhayandar Station West- Chimaji Appa Chouk1':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,165,0,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Bhayandar Station W-Thane Station East Kopry AC10AC':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(219,112,147,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'BHAYNDER STATION (W)-MORVA BHAT20':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(138,43,226,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'BHAYNDER STATION (W)-KASHIMIRA NAKA5':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(154,205,50,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Bhayandar Station W-Pagoda4':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(255,182,193,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Bhayandar Bus Station E-Borivali National Park14':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(138,43,226,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Mira Road Station-Rashmi Complex15':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(219,112,147,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Mira Road Station-Laxmi Park Tiwari College16':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(173,255,47,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Western Park-Jogeshwari Station west18':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(173,255,47,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Mira Road Station-JP North City19':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(135,206,250,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Mira Road Station E-Modern Comapany22':
+                    return {
+                pane: 'pane_GTFSRoutes_6',
+                opacity: 1,
+                color: 'rgba(173,255,47,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'round',
+                weight: 5.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_GTFSRoutes_6');
+        map.getPane('pane_GTFSRoutes_6').style.zIndex = 406;
+        map.getPane('pane_GTFSRoutes_6').style['mix-blend-mode'] = 'normal';
+        var layer_GTFSRoutes_6 = new L.geoJson.multiStyle(json_GTFSRoutes_6, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_GTFSRoutes_6',
+            layerName: 'layer_GTFSRoutes_6',
+            pane: 'pane_GTFSRoutes_6',
+            onEachFeature: pop_GTFSRoutes_6,
+            styles: [style_GTFSRoutes_6_0,style_GTFSRoutes_6_1,]
+        });
+        bounds_group.addLayer(layer_GTFSRoutes_6);
+        map.addLayer(layer_GTFSRoutes_6);
+        var baseMaps = {};
+        var overlaysTree = [
+            {label: 'GTFS Routes<br /><table><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_MiraRoadStationThaneEAC29AC0.png" /></td><td>Mira Road Station-Thane E AC29AC</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_MiraRoadStationEKDEmpire211.png" /></td><td>Mira Road Station E-KD Empire21</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_BHAYNDERSTATIONEMIRAROADSTATIONE282.png" /></td><td>BHAYNDER STATION E-MIRA ROAD STATION E28</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_BhayandarStationWUttanNaka23.png" /></td><td>Bhayandar Station W-Uttan Naka2</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_UttanNakaManoriTar64.png" /></td><td>Uttan Naka-Manori Tar6</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_MiraRoadStationWesternPark245.png" /></td><td>Mira Road Station-Western Park24</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_BhayandarStationWThaneStationEastKopry106.png" /></td><td>Bhayandar Station W-Thane Station East Kopry10</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_MiraRoadStationThaneE297.png" /></td><td>Mira Road Station-Thane E29</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_BhayandarStationEastKDEmpire128.png" /></td><td>Bhayandar Station East-KD Empire12</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_MiraroadStationEVinaynagar179.png" /></td><td>Miraroad Station E-Vinaynagar17</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_BhayandarStationWestChimajiAppaChouk110.png" /></td><td>Bhayandar Station West- Chimaji Appa Chouk1</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_BhayandarStationWThaneStationEastKopryAC10AC11.png" /></td><td>Bhayandar Station W-Thane Station East Kopry AC10AC</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_BHAYNDERSTATIONWMORVABHAT2012.png" /></td><td>BHAYNDER STATION (W)-MORVA BHAT20</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_BHAYNDERSTATIONWKASHIMIRANAKA513.png" /></td><td>BHAYNDER STATION (W)-KASHIMIRA NAKA5</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_BhayandarStationWPagoda414.png" /></td><td>Bhayandar Station W-Pagoda4</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_BhayandarBusStationEBorivaliNationalPark1415.png" /></td><td>Bhayandar Bus Station E-Borivali National Park14</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_MiraRoadStationRashmiComplex1516.png" /></td><td>Mira Road Station-Rashmi Complex15</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_MiraRoadStationLaxmiParkTiwariCollege1617.png" /></td><td>Mira Road Station-Laxmi Park Tiwari College16</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_WesternParkJogeshwariStationwest1818.png" /></td><td>Western Park-Jogeshwari Station west18</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_MiraRoadStationJPNorthCity1919.png" /></td><td>Mira Road Station-JP North City19</td></tr><tr><td style="text-align: center;"><img src="legend/GTFSRoutes_6_MiraRoadStationEModernComapany2220.png" /></td><td>Mira Road Station E-Modern Comapany22</td></tr></table>', layer: layer_GTFSRoutes_6},
+            {label: '<img src="legend/BusFrequency_5.png" /> Bus Frequency', layer: layer_BusFrequency_5},
+            {label: 'MBMC Routes Stats<br /><table><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route10.png" /></td><td>Route 1</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route101.png" /></td><td>Route 10</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route10AC2.png" /></td><td>Route 10 AC</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route123.png" /></td><td>Route 12</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route144.png" /></td><td>Route 14</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route155.png" /></td><td>Route 15</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route166.png" /></td><td>Route 16</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route177.png" /></td><td>Route 17</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route188.png" /></td><td>Route 18</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route199.png" /></td><td>Route 19</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route210.png" /></td><td>Route 2</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route2011.png" /></td><td>Route 20</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route2112.png" /></td><td>Route 21</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route2213.png" /></td><td>Route 22</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route2314.png" /></td><td>Route 23</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route2415.png" /></td><td>Route 24</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route2516.png" /></td><td>Route 25</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route2817.png" /></td><td>Route 28</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route2918.png" /></td><td>Route 29</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route29AC19.png" /></td><td>Route 29 AC</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route420.png" /></td><td>Route 4</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route521.png" /></td><td>Route 5</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_Route622.png" /></td><td>Route 6</td></tr><tr><td style="text-align: center;"><img src="legend/MBMCRoutesStats_4_23.png" /></td><td></td></tr></table>', layer: layer_MBMCRoutesStats_4},
+            {label: '<img src="legend/MBMCInternalCoverage_3.png" /> MBMC Internal Coverage', layer: layer_MBMCInternalCoverage_3},
+            {label: '<img src="legend/MBMCTotalLength_2.png" /> MBMC Total Length', layer: layer_MBMCTotalLength_2},
+            {label: '<img src="legend/MBMCStats_1.png" /> MBMC Stats', layer: layer_MBMCStats_1},
+            {label: "OpenStreetMap", layer: layer_OpenStreetMap_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        L.control.scale({position: 'bottomleft', maxWidth: 100, metric: true, imperial: false, updateWhenIdle: false}).addTo(map);
+        setBounds();
+        var i = 0;
+        layer_MBMCStats_1.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['shapeName'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Open Sans\', sans-serif;">' + layer.feature.properties['shapeName']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_MBMCStats_1'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_MBMCTotalLength_2.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['OVerall Km'] !== null?String('<div style="color: #323232; font-size: 15pt; font-family: \'Mongolian Baiti\', sans-serif;">' + layer.feature.properties['OVerall Km']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_MBMCTotalLength_2'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_MBMCInternalCoverage_3.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['MBMC KM'] !== null?String('<div style="color: #323232; font-size: 12pt; font-family: \'Mongolian Baiti\', sans-serif;">' + layer.feature.properties['MBMC KM']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_MBMCInternalCoverage_3'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_MBMCRoutesStats_4.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Name'] !== null?String('<div style="color: #000000; font-size: 10pt; font-family: \'Open Sans\', sans-serif;">' + layer.feature.properties['Name']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_MBMCRoutesStats_4'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_BusFrequency_5.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['frequency'] !== null?String('<div style="color: #000000; font-size: 10pt; font-weight: bold; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['frequency']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_BusFrequency_5'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        resetLabels([layer_MBMCStats_1,layer_MBMCTotalLength_2,layer_MBMCInternalCoverage_3,layer_MBMCRoutesStats_4,layer_BusFrequency_5]);
+        map.on("zoomend", function(){
+            resetLabels([layer_MBMCStats_1,layer_MBMCTotalLength_2,layer_MBMCInternalCoverage_3,layer_MBMCRoutesStats_4,layer_BusFrequency_5]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_MBMCStats_1,layer_MBMCTotalLength_2,layer_MBMCInternalCoverage_3,layer_MBMCRoutesStats_4,layer_BusFrequency_5]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_MBMCStats_1,layer_MBMCTotalLength_2,layer_MBMCInternalCoverage_3,layer_MBMCRoutesStats_4,layer_BusFrequency_5]);
+        });
+        </script>
+    </body>
+</html>
